@@ -1,18 +1,21 @@
 from dataclasses import dataclass
+from typing import Optional
 from .base import Node
-
-# Play-mode commands
 
 @dataclass
 class File(Node):
-    filename: str
+    filename: Optional[str] = None
+
+@dataclass
+class Start(Node):
+    pass
 
 @dataclass
 class Word(Node):
-    secret: str = None  
+    word: Optional[str] = None
 
 class Words(Node):
-    pass  # lists all the possible secret words
+    pass
 
 @dataclass
 class MaxGuesses(Node):
@@ -26,9 +29,6 @@ class Edit(Node):
     pass
 
 class Help(Node):
-    pass
-
-class Edit(Node):
     pass
 
 class Quit(Node):

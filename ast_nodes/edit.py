@@ -11,10 +11,6 @@ class File(Node):
     filename: str
 
 @dataclass
-class Mode(Node):
-    mode: str  # letters | hints | categories
-
-@dataclass
 class Categories(Node):
     headers: List[str]
 
@@ -33,7 +29,11 @@ class Edit(Node):
 
 @dataclass
 class Delete(Node):
-    index: int  # starts at index 1
+    index: int
+
+@dataclass
+class DeleteFile(Node):
+    filename: str
 
 class Done(Node):
     pass

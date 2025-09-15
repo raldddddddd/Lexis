@@ -3,7 +3,7 @@ from enum import Enum
 from dataclasses import dataclass
 
 class TokenType(Enum):
-    IDENT = "IDENT"    # command words, file paths
+    IDENT = "IDENT"    # command words
     INT = "INT"        # numbers
     PIPE = "PIPE"      # '|'
     STRING = "STRING"  # quoted text
@@ -44,7 +44,7 @@ class Lexer:
                 text = m.group(0)
                 self.pos = m.end()
 
-                if not ttype:  # whitespace, skip
+                if not ttype:  # skips whitespace
                     return self.next_token()
 
                 if ttype == TokenType.STRING:

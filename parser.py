@@ -1,17 +1,19 @@
 from typing import List
+from lexer import Token, TokenType
 from ast_nodes import play, edit
-from lexer import Token, TokenType, LexerError
 
 class ParserError(Exception):
     pass
 
 class Parser:
-    def __init__(self, tokens: List[Token]):
+    def __init__(self, tokens: List[Token], mode: str = "play"):
         self.tokens = tokens
         self.pos = 0
+        self.mode = mode.lower() if mode in ("play", "edit") else "play"
 
         self.play_cmds = {
             "file": lambda: play.File(self._expect(TokenType.IDENT).text),
+            "start": lambda: play.Start(),
             "word": self._parse_word,
             "words": lambda: play.Words(),
             "max_guesses": lambda: play.MaxGuesses(int(self._expect(TokenType.INT).text)),
@@ -24,25 +26,25 @@ class Parser:
         self.edit_cmds = {
             "create": lambda: edit.Create(self._expect(TokenType.IDENT).text),
             "file": lambda: edit.File(self._expect(TokenType.IDENT).text),
-            "mode": lambda: edit.Mode(self._expect(TokenType.IDENT).text),
+            "deletefile": lambda: edit.DeleteFile(self._expect(TokenType.IDENT).text),
             "categories": self._parse_categories,
             "add": self._parse_add,
             "list": lambda: edit.ListWords(),
+            "edit": self._parse_edit,
             "delete": lambda: edit.Delete(int(self._expect(TokenType.INT).text)),
             "done": lambda: edit.Done(),
             "help": lambda: edit.Help(),
-            "edit": self._parse_edit,
         }
 
-    def _peek(self)Token:
+    def _peek(self):
         return self.tokens[self.pos] if self.pos < len(self.tokens) else Token(TokenType.EOF, "")
 
-    def _advance(self)Token:
+    def _advance(self):
         tok = self._peek()
         self.pos += 1
         return tok
 
-    def _expect(self, ttype: TokenType)Token:
+    def _expect(self, ttype: TokenType):
         tok = self._peek()
         if tok.type != ttype:
             raise ParserError(f"Expected {ttype}, got {tok.type} ('{tok.text}')")
@@ -55,11 +57,15 @@ class Parser:
         cmd_name = tok.text.lower()
         self._advance()
 
-        if cmd_name in self.play_cmds:
+        if cmd_name == "help":
+            return edit.Help() if self.mode == "edit" else play.Help()
+
+        if self.mode == "play" and cmd_name in self.play_cmds:
             return self.play_cmds[cmd_name]()
-        if cmd_name in self.edit_cmds:
+        if self.mode == "edit" and cmd_name in self.edit_cmds:
             return self.edit_cmds[cmd_name]()
-        raise ParserError(f"Unknown command '{cmd_name}'")
+
+        raise ParserError(f"Unknown command '{cmd_name}' in {self.mode} mode")
 
     def _parse_word(self):
         next_tok = self._peek()
