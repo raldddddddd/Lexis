@@ -25,6 +25,9 @@ class MaxGuesses(Node):
 class Guess(Node):
     word: str
 
+class Show(Node):
+    pass
+
 class Edit(Node):
     pass
 

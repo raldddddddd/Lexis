@@ -5,13 +5,14 @@ from .base import Node
 @dataclass
 class Create(Node):
     filename: str
+    mode: Optional[str] = None
 
 @dataclass
 class File(Node):
     filename: str
 
 @dataclass
-class Categories(Node):
+class Categories(Node): 
     headers: List[str]
 
 @dataclass

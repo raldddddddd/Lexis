@@ -18,13 +18,14 @@ class Parser:
             "words": lambda: play.Words(),
             "max_guesses": lambda: play.MaxGuesses(int(self._expect(TokenType.INT).text)),
             "guess": lambda: play.Guess(self._expect(TokenType.IDENT).text),
+            "show": lambda: play.Show(),
             "edit": lambda: play.Edit(),
             "help": lambda: play.Help(),
             "quit": lambda: play.Quit(),
         }
 
         self.edit_cmds = {
-            "create": lambda: edit.Create(self._expect(TokenType.IDENT).text),
+            "create": self._parse_create,
             "file": lambda: edit.File(self._expect(TokenType.IDENT).text),
             "deletefile": lambda: edit.DeleteFile(self._expect(TokenType.IDENT).text),
             "categories": self._parse_categories,
@@ -98,6 +99,14 @@ class Parser:
                 break
         return edit.Add(word_tok.text, values)
 
+    def _parse_create(self):
+        filename_tok = self._expect(TokenType.IDENT)
+        mode = None
+        next_tok = self._peek()
+        if next_tok.type == TokenType.IDENT:
+            mode = self._advance().text.lower()
+        return edit.Create(filename_tok.text, mode)
+    
     def _parse_edit(self):
         index_tok = self._expect(TokenType.INT)
         values = []

@@ -11,6 +11,7 @@ class InterpreterError(Exception):
 class Interpreter:
     def __init__(self):
         self.mode = "play"
+        self.file_mode = "letters"
         self.words = []
         self.word_data = []
         self.categories = []
@@ -49,7 +50,7 @@ class Interpreter:
         if isinstance(node, play.Help):
             commands = ["file <filename>", "start", "help", "quit", "edit"]
             if self.current_file:
-                commands += ["words", "max_guesses <n>", "word <word>", "guess <word>"]
+                commands += ["words", "max_guesses <n>", "word [<word>]", "guess <word>", "show"]
             return "Play commands available:\n  " + "\n  ".join(commands)
 
         if isinstance(node, play.File):
@@ -58,30 +59,37 @@ class Interpreter:
         if isinstance(node, play.Start):
             if not self.current_file:
                 return "Error: No word bank loaded."
+            if not self.words:
+                return "Error: Word bank empty."
             self.secret = None
             self.secret_row = None
             self.hint_index = 0
             self.remaining_guesses = self.max_guesses
-            return "Game started! Type 'word' or 'word <word>' to choose a secret word."
+            if self.file_mode == "letters":
+                return "Game started in LETTERS mode. Use 'word' or 'word <word>' to choose a secret word."
+            elif self.file_mode == "hints":
+                return "Game started in HINTS mode. Use 'word' or 'word <word>' to select a secret word."
+            elif self.file_mode == "categories":
+                return "Game started in CATEGORIES mode. Use 'word' or 'word <word>' to select a secret word."
+            else:
+                return "Unknown game mode."
 
         if isinstance(node, play.Word):
             if not self.current_file:
                 return "Error: No word bank loaded."
+            if not self.words:
+                return "Error: Word bank empty."
             if node.word:
                 if node.word not in self.words:
                     return f"Error: Word '{node.word}' not in bank."
                 idx = self.words.index(node.word)
-                self.secret = node.word
-                self.secret_row = self.word_data[idx]
             else:
-                if not self.words:
-                    return "Error: Word bank empty."
                 idx = random.randrange(len(self.words))
-                self.secret = self.words[idx]
-                self.secret_row = self.word_data[idx]
-            self.remaining_guesses = self.max_guesses
+            self.secret = self.words[idx]
+            self.secret_row = self.word_data[idx]
             self.hint_index = 0
-            return f"Secret word set. Use 'guess <word>'."
+            self.remaining_guesses = self.max_guesses
+            return f"Secret word set to '{self.secret}'. Use 'guess <word>' to start guessing."
 
         if isinstance(node, play.Guess):
             if not self.secret:
@@ -91,20 +99,25 @@ class Interpreter:
             self.remaining_guesses -= 1
             feedback = self._make_feedback(node.word)
             if node.word == self.secret:
+                win_msg = {"result": "win", "feedback": feedback}
                 self.secret = None
                 self.secret_row = None
-                return json.dumps({"result": "win", "feedback": feedback})
+                return json.dumps(win_msg)
             extra = None
-            if self.categories:
-                pass
-            elif len(self.secret_row) > 1:
-                if self.hint_index < len(self.secret_row) - 1:
-                    extra = self.secret_row[self.hint_index + 1]
-                    self.hint_index += 1
+            if self.file_mode == "hints":
+                if len(self.secret_row) > 1:
+                    if self.hint_index < len(self.secret_row) - 1:
+                        self.hint_index += 1
+                        extra = self.secret_row[self.hint_index]
             result = {"result": "continue", "feedback": feedback, "remaining": self.remaining_guesses}
             if extra:
                 result["hint"] = extra
             return json.dumps(result)
+
+        if isinstance(node, play.Show):
+            if not self.secret:
+                return "No secret word chosen."
+            return f"The secret word is: {self.secret}"
 
         if isinstance(node, play.Words):
             if not self.current_file:
@@ -126,22 +139,32 @@ class Interpreter:
         return f"Unknown play command: {node}"
 
     def _make_feedback(self, guess):
-        if self.categories:
-            g_idx = self.words.index(guess) if guess in self.words else None
-            if g_idx is None:
-                return ["red"]
+        if self.file_mode == "categories":
+            if guess not in self.words:
+                return ["❌ Word not in list."]
+            g_idx = self.words.index(guess)
             g_row = self.word_data[g_idx]
-            return ["green" if g_row[i] == self.secret_row[i] else "red" for i in range(len(g_row))]
-        secret = self.secret
-        feedback = []
-        for i, ch in enumerate(guess):
-            if i < len(secret) and ch == secret[i]:
-                feedback.append("green")
-            elif ch in secret:
-                feedback.append("orange")
-            else:
-                feedback.append("red")
-        return feedback
+            feedback = []
+            for i in range(1, len(g_row)):
+                if i < len(self.secret_row) and g_row[i].strip().lower() == self.secret_row[i].strip().lower():
+                    feedback.append(f"{self.categories[i-1]}: ✅ ({g_row[i]})")
+                else:
+                    feedback.append(f"{self.categories[i-1]}: ❌ ({g_row[i]})")
+            return feedback
+        elif self.file_mode == "letters":
+            secret = self.secret
+            feedback = []
+            for i, ch in enumerate(guess):
+                if i < len(secret) and ch == secret[i]:
+                    feedback.append("🟩")
+                elif ch in secret:
+                    feedback.append("🟨")
+                else:
+                    feedback.append("⬜")
+            return "".join(feedback)
+        elif self.file_mode == "hints":
+            return "❌ Incorrect guess."
+        return "Invalid feedback mode."
 
     def _eval_edit(self, node):
         if isinstance(node, edit.Help):
@@ -151,7 +174,7 @@ class Interpreter:
             return "Edit commands available:\n  " + "\n  ".join(commands)
 
         if isinstance(node, edit.Create):
-            return self._create_file(node.filename)
+            return self._create_file(node.filename, node.mode)
 
         if isinstance(node, edit.File):
             return self._load_file(node.filename)
@@ -215,16 +238,23 @@ class Interpreter:
 
         return f"Unknown edit command: {node}"
 
-    def _create_file(self, filename):
+    def _create_file(self, filename, mode=None):
         if os.path.exists(filename):
             return f"Error: file '{filename}' already exists"
+        mode = (mode or "letters").lower()
+        if mode not in ("letters", "hints", "categories"):
+            return "Error: Invalid mode. Must be one of: letters, hints, categories"
         with open(filename, "w", encoding="utf-8") as f:
-            pass
+            if mode == "categories":
+                f.write("word | category1 | category2 | category3\n")
+            else:
+                f.write("")
         self.current_file = filename
         self.words = []
         self.word_data = []
         self.categories = []
-        return f"Created file '{filename}'. Use 'categories' or 'add'."
+        self.file_mode = mode
+        return f"Created '{filename}' in {mode} mode."
 
     def _load_file(self, filename):
         if not os.path.exists(filename):
@@ -232,27 +262,48 @@ class Interpreter:
         with open(filename, "r", encoding="utf-8") as f:
             lines = [line.strip() for line in f if line.strip()]
         if not lines:
-            self.categories, self.word_data, self.words = [], [], []
-        else:
-            first = lines[0].split("|")
-            if len(first) > 1 and all(x.strip() for x in first):
-                self.categories = [x.strip() for x in first]
-                self.word_data = [[y.strip() for y in line.split("|")] for line in lines[1:]]
+            self.words, self.word_data, self.categories = [], [], []
+            self.current_file = filename
+            self.file_mode = "letters"
+            return f"Loaded file '{filename}' (empty)"
+        first_line = lines[0]
+        if "|" in first_line:
+            if first_line.lower().startswith("word |"):
+                file_mode = "categories"
             else:
-                self.categories = []
-                self.word_data = [[y.strip() for y in line.split("|")] for line in lines]
-        self.words = [row[0] for row in self.word_data]
+                file_mode = "hints"
+        else:
+            file_mode = "letters"
+        self.words, self.word_data, self.categories = [], [], []
         self.current_file = filename
-        return f"Loaded file '{filename}' with {len(self.words)} words"
+        self.file_mode = file_mode
+        if file_mode == "letters":
+            self.words = lines
+            self.word_data = [[w] for w in lines]
+        elif file_mode == "hints":
+            for line in lines:
+                parts = [p.strip() for p in line.split("|")]
+                self.word_data.append(parts)
+                self.words.append(parts[0])
+        elif file_mode == "categories":
+            headers = [h.strip() for h in lines[0].split("|")]
+            self.categories = headers[1:] if len(headers) > 1 else []
+            for line in lines[1:]:
+                parts = [p.strip() for p in line.split("|")]
+                if len(parts) >= 1:
+                    self.word_data.append(parts)
+                    self.words.append(parts[0])
+        return f"Loaded file '{filename}' ({file_mode} mode, {len(self.words)} entries)"
 
     def _save_file(self):
         if not self.current_file:
             return "Error: no file selected"
         with open(self.current_file, "w", encoding="utf-8") as f:
-            if self.categories:
-                f.write(" | ".join(self.categories) + "\n")
+            if self.file_mode == "categories" and self.categories:
+                f.write("word | " + " | ".join(self.categories) + "\n")
             for row in self.word_data:
-                f.write(" | ".join(row) + "\n")
+                if isinstance(row, list):
+                    f.write(" | ".join(row) + "\n")
         return f"Saved to '{self.current_file}'"
 
     def _delete_file(self, filename):
