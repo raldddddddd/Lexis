@@ -33,7 +33,7 @@ Used to create, load, and modify word bank files.
 
 | Command | Description | Example |
 |----------|--------------|----------|
-| `create <filename> [mode]` | Create a new file. Optional mode: `letters`, `categories`, or `hints`. | `create fruits letters` |
+| `create <filename>` | Create a new file. | `create fruits` |
 | `file <filename>` | Load an existing file into edit mode. | `file tea` |
 | `deletefile <filename>` | Delete a file from storage. | `deletefile tea` |
 | `categories <name1> \| <name2> \| ...` | Define column headers for category mode. | `categories size \| shape \| color` |

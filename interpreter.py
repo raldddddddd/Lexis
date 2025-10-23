@@ -183,7 +183,7 @@ class Interpreter:
         if isinstance(node, edit.Help):
             lines = [
                 "\n=== Edit Mode Commands ===",
-                "create <filename> [letters|categories|hints]  - Create a new word bank file",
+                "create <filename>                            - Create a new word bank file",
                 "file <filename>                              - Load an existing word bank file",
                 "deletefile <filename>                        - Delete a word bank file",
                 "categories <cat1> | <cat2> | <cat3>          - Define categories (for categories mode)",
@@ -264,21 +264,16 @@ class Interpreter:
 
         return f"Unknown edit command: {node}"
 
-    def _create_file(self, filename, mode=None):
+    def _create_file(self, filename):
         if os.path.exists(filename):
             return f"Error: file '{filename}' already exists"
-        mode = (mode or "letters").lower()
-        if mode not in ("letters", "hints", "categories"):
-            return "Error: Invalid mode. Must be one of: letters, hints, categories"
         with open(filename, "w", encoding="utf-8") as f:
-            if mode == "categories":
-                f.write("word | category1 | category2 | category3\n")
+            pass
         self.current_file = filename
-        self.words = []
-        self.word_data = []
-        self.categories = []
-        self.file_mode = mode
-        return f"Created '{filename}' in {mode} mode."
+        self.words, self.word_data, self.categories = [], [], []
+        self.file_mode = "letters"
+        return f"Created '{filename}' in letters mode (default)."
+
 
     def _load_file(self, filename):
         if not os.path.exists(filename):

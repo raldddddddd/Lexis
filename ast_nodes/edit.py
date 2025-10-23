@@ -5,7 +5,6 @@ from .base import Node
 @dataclass
 class Create(Node):
     filename: str
-    mode: Optional[str] = None
 
 @dataclass
 class File(Node):
