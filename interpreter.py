@@ -198,7 +198,7 @@ class Interpreter:
             return "\n".join(lines)
 
         if isinstance(node, edit.Create):
-            return self._create_file(node.filename, node.mode)
+            return self._create_file(node.filename)
 
         if isinstance(node, edit.File):
             return self._load_file(node.filename)

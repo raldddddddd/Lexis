@@ -101,11 +101,10 @@ class Parser:
 
     def _parse_create(self):
         filename_tok = self._expect(TokenType.IDENT)
-        mode = None
         next_tok = self._peek()
         if next_tok.type == TokenType.IDENT:
-            mode = self._advance().text.lower()
-        return edit.Create(filename_tok.text, mode)
+            self._advance()
+        return edit.Create(filename_tok.text)
     
     def _parse_edit(self):
         index_tok = self._expect(TokenType.INT)
