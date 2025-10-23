@@ -163,7 +163,10 @@ class Interpreter:
                     feedback.append("⬜")
             return "".join(feedback)
         elif self.file_mode == "hints":
-            return "❌ Incorrect guess."
+            if guess == self.secret:
+                return f"✅ Correct! The word was '{self.secret}'."
+            else:
+                return "❌ Incorrect guess."
         return "Invalid feedback mode."
 
     def _eval_edit(self, node):
@@ -186,14 +189,16 @@ class Interpreter:
             if not self.current_file:
                 return "Error: No file loaded."
             self.categories = node.headers
+            self.file_mode = "categories"
             return self._save_file()
 
         if isinstance(node, edit.Add):
             if not self.current_file:
                 return "Error: No file loaded."
             row = [node.word] + node.values
-            if self.categories and len(row) != len(self.categories):
-                return f"Error: Expected {len(self.categories)} values, got {len(row)}"
+            expected_len = 1 + len(self.categories)
+            if self.file_mode == "categories" and len(row) != expected_len:
+                return f"Error: Expected {expected_len} values (1 word + {len(self.categories)} categories), got {len(row)}"
             self.word_data.append(row)
             self.words.append(node.word)
             return self._save_file()
@@ -205,7 +210,7 @@ class Interpreter:
                 return "No words available."
             lines = []
             if self.categories:
-                lines.append(" | ".join(self.categories))
+                lines.append("word | " + " | ".join(self.categories))
                 lines.append("-" * len(lines[0]))
             for row in self.word_data:
                 lines.append(" | ".join(row))
@@ -217,8 +222,8 @@ class Interpreter:
             if node.index < 1 or node.index > len(self.word_data):
                 return f"Error: Index {node.index} out of range"
             new_row = node.values
-            if self.categories and len(new_row) != len(self.categories):
-                return f"Error: Expected {len(self.categories)} values, got {len(new_row)}"
+            if self.categories and len(new_row) != len(self.categories) + 1:
+                return f"Error: Expected {len(self.categories) + 1} values, got {len(new_row)}"
             self.word_data[node.index - 1] = new_row
             self.words[node.index - 1] = new_row[0]
             return self._save_file()
@@ -247,8 +252,6 @@ class Interpreter:
         with open(filename, "w", encoding="utf-8") as f:
             if mode == "categories":
                 f.write("word | category1 | category2 | category3\n")
-            else:
-                f.write("")
         self.current_file = filename
         self.words = []
         self.word_data = []
@@ -287,23 +290,32 @@ class Interpreter:
                 self.words.append(parts[0])
         elif file_mode == "categories":
             headers = [h.strip() for h in lines[0].split("|")]
-            self.categories = headers[1:] if len(headers) > 1 else []
+            if headers[0].lower() != "word":
+                return f"Error: Invalid categories file '{filename}' (missing 'word' header)"
+            self.categories = headers[1:]
             for line in lines[1:]:
                 parts = [p.strip() for p in line.split("|")]
-                if len(parts) >= 1:
-                    self.word_data.append(parts)
-                    self.words.append(parts[0])
+                if not parts or not parts[0]:
+                    continue
+                self.word_data.append(parts)
+                self.words.append(parts[0])
         return f"Loaded file '{filename}' ({file_mode} mode, {len(self.words)} entries)"
 
     def _save_file(self):
         if not self.current_file:
             return "Error: no file selected"
         with open(self.current_file, "w", encoding="utf-8") as f:
-            if self.file_mode == "categories" and self.categories:
-                f.write("word | " + " | ".join(self.categories) + "\n")
-            for row in self.word_data:
-                if isinstance(row, list):
+            if self.file_mode == "categories":
+                if self.categories:
+                    f.write("word | " + " | ".join(self.categories) + "\n")
+                for row in self.word_data:
                     f.write(" | ".join(row) + "\n")
+            elif self.file_mode == "hints":
+                for row in self.word_data:
+                    f.write(" | ".join(row) + "\n")
+            elif self.file_mode == "letters":
+                for row in self.word_data:
+                    f.write(row[0] + "\n")
         return f"Saved to '{self.current_file}'"
 
     def _delete_file(self, filename):
