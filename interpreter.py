@@ -48,10 +48,20 @@ class Interpreter:
 
     def _eval_play(self, node):
         if isinstance(node, play.Help):
-            commands = ["file <filename>", "start", "help", "quit", "edit"]
-            if self.current_file:
-                commands += ["words", "max_guesses <n>", "word [<word>]", "guess <word>", "show"]
-            return "Play commands available:\n  " + "\n  ".join(commands)
+            lines = [
+                "\n=== Play Mode Commands ===",
+                "file <filename>        - Load a word bank to play",
+                "start                  - Start the game session",
+                "word [<word>]          - Select or randomize a secret word",
+                "guess <word>           - Submit your guess",
+                "show                   - Display the current secret word",
+                "words                  - List all words in the current word bank",
+                "max_guesses <n>        - Set the maximum number of guesses",
+                "edit                   - Switch to edit mode",
+                "help                   - Show this help message",
+                "quit                   - Exit the game",
+            ]
+            return "\n".join(lines)
 
         if isinstance(node, play.File):
             return self._load_file(node.filename)
@@ -171,10 +181,21 @@ class Interpreter:
 
     def _eval_edit(self, node):
         if isinstance(node, edit.Help):
-            commands = ["create <filename>", "file <filename>", "deletefile <filename>", "help", "done"]
-            if self.current_file:
-                commands += ["categories <c1|c2|...>", "add <word|v1|...>", "list", "edit <index v1|...>", "delete <index>"]
-            return "Edit commands available:\n  " + "\n  ".join(commands)
+            lines = [
+                "\n=== Edit Mode Commands ===",
+                "create <filename> [letters|categories|hints]  - Create a new word bank file",
+                "file <filename>                              - Load an existing word bank file",
+                "deletefile <filename>                        - Delete a word bank file",
+                "categories <cat1> | <cat2> | <cat3>          - Define categories (for categories mode)",
+                "add <word>                                   - Add a word (letters mode)",
+                "add <word> | <val1> | <val2> | <val3>        - Add a word with values or hints",
+                "list                                         - Display all entries in the current file",
+                "edit <index> | <new values>                  - Edit a word entry",
+                "delete <index>                               - Delete a word by its index",
+                "done                                         - Exit edit mode and return to play mode",
+                "help                                         - Show this help message",
+            ]
+            return "\n".join(lines)
 
         if isinstance(node, edit.Create):
             return self._create_file(node.filename, node.mode)
