@@ -99,13 +99,15 @@ class Interpreter:
             self.secret_row = self.word_data[idx]
             self.hint_index = 0
             self.remaining_guesses = self.max_guesses
-            return f"Secret word set to '{self.secret}'. Use 'guess <word>' to start guessing."
+            return f"Secret word has been set. Use 'guess <word>' to start guessing."
 
         if isinstance(node, play.Guess):
             if not self.secret:
                 return "Error: No secret word chosen."
             if self.remaining_guesses <= 0:
                 return "No guesses left."
+            if node.word not in self.words:
+                return f"Error: Word '{node.word}' not in bank." 
             self.remaining_guesses -= 1
             feedback = self._make_feedback(node.word)
             if node.word == self.secret:
