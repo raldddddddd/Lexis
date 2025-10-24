@@ -217,9 +217,15 @@ class Interpreter:
             if not self.current_file:
                 return "Error: No file loaded."
             row = [node.word] + node.values
+            if self.file_mode == "letters" and len(row) > 1:
+                if self.categories:
+                    self.file_mode = "categories"
+                else:
+                    self.file_mode = "hints"
             expected_len = 1 + len(self.categories)
             if self.file_mode == "categories" and len(row) != expected_len:
                 return f"Error: Expected {expected_len} values (1 word + {len(self.categories)} categories), got {len(row)}"
+
             self.word_data.append(row)
             self.words.append(node.word)
             return self._save_file()
