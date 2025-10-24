@@ -85,16 +85,18 @@ Each file type determines how data is stored and used during play.
 ### 🔹 Option 1: Run in Terminal (REPL)
 ```bash
 python repl.py
+```
 
 ### 🔹 Option 2: Run as a Web App
 
 Add codes in app.py and utilize flask file formatting
+```bash
 flask run
-
+```
 ---
 
 ## 🧠 Example Workflow
-
+```bash
 [Edit] >>> create tea
 Created 'tea' in letters mode.
 
@@ -126,7 +128,7 @@ Secret word set to 'hibiscus'. Use 'guess <word>' to start guessing.
 
 [Play] [tea] >>> show
 The secret word is: hibiscus
-
+```
 ---
 
 ## 📝 Notes
@@ -151,11 +153,30 @@ The secret word is: hibiscus
 
 ## 📂 Project Structure
 
-├── interpreter.py # Main logic and command evaluation
-├── parser.py # Command parsing into AST nodes
-├── lexer.py # Tokenizer for user input
+├── Interpreter/
+│ ├──interpreter.py # Main logic and command evaluation
+│ ├──parser.py # Command parsing into AST nodes
+│ ├──lexer.py # Tokenizer for user input
 ├── ast_nodes/
 │ ├── play.py # Play mode node definitions
 │ ├── edit.py # Edit mode node definitions
 │ └── base.py # Shared node base class
+├── WordBanks/
+└── repl.py
+└── app.py
+└── README.md
+
+├── Interpreter/
+│   ├── __init__.py
+│   ├── interpreter.py # Main logic and command evaluation
+│   ├── parser.py # Command parsing into AST nodes
+│   ├── lexer.py # Tokenizer for user input
+│   ├── ast_nodes/
+│   │   ├── __init__.py
+│   │   ├── play.py # Play mode node definitions
+│   │   ├── edit.py # Edit mode node definitions
+│   │   └── base.py # Shared node base class
+├── WordBanks/ # Where all word bank files are stored
+├── repl.py # Runs Lexis in terminal
+├── app.py # Runs Lexis as a Web App
 └── README.md

@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify
-from interpreter import Interpreter, InterpreterError
+from Interpreter import Interpreter, InterpreterError
 
 app = Flask(__name__)
 interp = Interpreter()

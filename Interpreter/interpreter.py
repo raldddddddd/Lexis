@@ -1,9 +1,9 @@
 import os
 import random
 import json
-from lexer import Lexer
-from parser import Parser, ParserError
-from ast_nodes import play, edit
+from .lexer import Lexer
+from .parser import Parser, ParserError
+from .ast_nodes import play, edit
 
 class InterpreterError(Exception):
     pass
@@ -20,6 +20,7 @@ class Interpreter:
         self.max_guesses = 6
         self.remaining_guesses = self.max_guesses
         self.current_file = None
+        self.current_filename = None
         self.hint_index = 0
 
     def run_once(self, code: str):
@@ -99,7 +100,15 @@ class Interpreter:
             self.secret_row = self.word_data[idx]
             self.hint_index = 0
             self.remaining_guesses = self.max_guesses
-            return f"Secret word has been set. Use 'guess <word>' to start guessing."
+            if self.file_mode == "hints":
+                if len(self.secret_row) > 1:
+                    if self.hint_index < len(self.secret_row) - 1:
+                        self.hint_index += 1
+                        extra = self.secret_row[self.hint_index]
+                if extra:
+                    return f"Secret word has been set. Use 'guess <word>' to start guessing.\nHint: {extra}"
+            else:
+                return f"Secret word has been set. Use 'guess <word>' to start guessing."
 
         if isinstance(node, play.Guess):
             if not self.secret:
@@ -273,24 +282,34 @@ class Interpreter:
         return f"Unknown edit command: {node}"
 
     def _create_file(self, filename):
-        if os.path.exists(filename):
+        folder_path = os.path.join("WordBanks")
+        os.makedirs(folder_path, exist_ok=True)
+
+        filepath = os.path.join(folder_path, filename)
+        
+        if os.path.exists(filepath):
             return f"Error: file '{filename}' already exists"
-        with open(filename, "w", encoding="utf-8") as f:
+        with open(filepath, "w", encoding="utf-8") as f:
             pass
-        self.current_file = filename
+        self.current_file = filepath
+        self.current_filename = filename
         self.words, self.word_data, self.categories = [], [], []
         self.file_mode = "letters"
         return f"Created '{filename}' in letters mode (default)."
 
 
     def _load_file(self, filename):
-        if not os.path.exists(filename):
+        folder_path = os.path.join("WordBanks")
+        filepath = os.path.join(folder_path, filename)
+        
+        if not os.path.exists(filepath):
             return f"Error: file '{filename}' not found"
-        with open(filename, "r", encoding="utf-8") as f:
+        with open(filepath, "r", encoding="utf-8") as f:
             lines = [line.strip() for line in f if line.strip()]
         if not lines:
             self.words, self.word_data, self.categories = [], [], []
-            self.current_file = filename
+            self.current_file = filepath
+            self.current_filename = filename
             self.file_mode = "letters"
             return f"Loaded file '{filename}' (empty)"
         first_line = lines[0]
@@ -302,7 +321,8 @@ class Interpreter:
         else:
             file_mode = "letters"
         self.words, self.word_data, self.categories = [], [], []
-        self.current_file = filename
+        self.current_file = filepath
+        self.current_filename = filename
         self.file_mode = file_mode
         if file_mode == "letters":
             self.words = lines
@@ -340,12 +360,15 @@ class Interpreter:
             elif self.file_mode == "letters":
                 for row in self.word_data:
                     f.write(row[0] + "\n")
-        return f"Saved to '{self.current_file}'"
+        return f"Saved to '{self.current_filename}'"
 
     def _delete_file(self, filename):
-        if not os.path.exists(filename):
+        folder_path = os.path.join("..", "WordBanks")
+        filepath = os.path.join(folder_path, filename)
+        
+        if not os.path.exists(filepath):
             return f"Error: file '{filename}' does not exist"
-        os.remove(filename)
+        os.remove(filepath)
         if self.current_file == filename:
             self.current_file, self.words, self.word_data, self.categories = None, [], [], []
         return f"Deleted file '{filename}'"

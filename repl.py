@@ -1,4 +1,4 @@
-from interpreter import Interpreter, InterpreterError
+from Interpreter import Interpreter, InterpreterError
 import json
 import sys
 
@@ -47,7 +47,7 @@ def repl():
     while True:
         try:
             mode = interp.mode.capitalize()
-            file_info = f" [{interp.current_file}]" if interp.current_file else ""
+            file_info = f" [{interp.current_filename}]" if interp.current_filename else ""
             prompt = f"[{mode}]{file_info} >>> "
 
             command = input(prompt).strip()
