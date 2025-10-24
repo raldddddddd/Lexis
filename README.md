@@ -153,19 +153,7 @@ The secret word is: hibiscus
 
 ## 📂 Project Structure
 
-├── Interpreter/
-│ ├──interpreter.py # Main logic and command evaluation
-│ ├──parser.py # Command parsing into AST nodes
-│ ├──lexer.py # Tokenizer for user input
-├── ast_nodes/
-│ ├── play.py # Play mode node definitions
-│ ├── edit.py # Edit mode node definitions
-│ └── base.py # Shared node base class
-├── WordBanks/
-└── repl.py
-└── app.py
-└── README.md
-
+```bash
 ├── Interpreter/
 │   ├── __init__.py
 │   ├── interpreter.py # Main logic and command evaluation
@@ -180,3 +168,4 @@ The secret word is: hibiscus
 ├── repl.py # Runs Lexis in terminal
 ├── app.py # Runs Lexis as a Web App
 └── README.md
+```
