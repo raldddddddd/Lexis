@@ -88,7 +88,6 @@ python repl.py
 
 ### 🔹 Option 2: Run as a Web App
 
-bash
 Add codes in app.py and utilize flask file formatting
 flask run
 
