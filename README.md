@@ -73,8 +73,8 @@ Each file type determines how data is stored and used during play.
 | Mode | Structure | Example |
 |------|------------|----------|
 | **letters** | Each line contains one word | `apple` |
-| **categories** | First line defines column headers using pipes (`|`) <br> Each subsequent line defines word entries | `word \| size \| shape \| color`<br>`hibiscus \| large \| round \| red` |
-| **hints** | Word followed by a hint separated by `|` | `apple \| a red fruit` |
+| **categories** | First line defines column headers using pipes (`&#124;`) <br> Each subsequent line defines word entries | `word &#124; size &#124; shape &#124; color`<br>`hibiscus &#124; large &#124; round &#124; red` |
+| **hints** | Word followed by a hint separated by `&#124;` | `apple &#124; a red fruit` |
 
 > Using the `categories` command in Edit mode automatically switches the current file to **category mode**.
 
