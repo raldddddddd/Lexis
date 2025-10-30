@@ -71,10 +71,10 @@ Used to play guessing games using a loaded word bank.
 Each file type determines how data is stored and used during play.
 
 | Mode | Structure | Example |
-|------|-----------|---------|
-| **letters** | Each line contains one word | <code>apple</code> |
-| **categories** | First line defines column headers using pipes (<code>word | size | shape | color</code>)<br>Each subsequent line defines word entries | <code>hibiscus | large | round | red</code> |
-| **hints** | Word followed by a hint separated by <code>|</code> | <code>apple | a red fruit</code> |
+|------|------------|----------|
+| **letters** | Each line contains one word | `apple` |
+| **categories** | First line defines column headers using pipes (`\|`) <br> Each subsequent line defines word entries | `word \| size \| shape \| color`<br>`hibiscus \| large \| round \| red` |
+| **hints** | Word followed by a hint separated by `\|` | `apple \| a red fruit` |
 
 > Using the `categories` command in Edit mode automatically switches the current file to **category mode**.
 
