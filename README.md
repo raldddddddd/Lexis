@@ -6,6 +6,8 @@ A command-line word bank manager and word-guessing game framework built with Pyt
 This README is a short overview.  
 For the complete in-depth manual, download:  
 ➡️ **[Lexis Full User Guide](docs/Lexis_Full_User_Guide.pdf)**
+For internal technical details, see:
+➡️ Developer Reference Manual (docs/Developer_Reference_Manual.md)
 
 ## Features
 
