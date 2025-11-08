@@ -196,7 +196,7 @@ Secret word has been set. Use 'guess <word>' to start guessing.
 
 - Commands are case-insensitive
 - File format is auto-detected on load
-- Quotation marks optional unless values contain spaces
+- Quotation marks are optional unless values contain spaces
 - The `categories` command automatically switches files to category mode
 - Use `start` before selecting words or making guesses in play mode
 
@@ -207,12 +207,4 @@ The interpreter provides clear error messages for common issues:
 - Empty word banks
 - Invalid indices
 - Mismatched category counts
-- Words not in current bank
-
-## License
-
-[Add your license information here]
-
-## Contributing
-
-[Add contribution guidelines here]
+- Words not in the current bank
