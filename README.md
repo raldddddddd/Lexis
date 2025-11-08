@@ -1,171 +1,218 @@
-# 🧩 Word Bank Interpreter
+# Lexis - Word Bank Interpreter
 
-A Python-based command-line word bank manager and word-guessing game framework.
+A command-line word bank manager and word-guessing game framework built with Python. Lexis supports three game modes: letter-based word guessing (similar to Wordle), category-based comparison, and hint-driven gameplay.
 
-It supports three types of word banks:
-- **Letters Mode** — simple word lists  
-- **Categories Mode** — multi-attribute word sets  
-- **Hints Mode** — word-hint pairs  
+## Features
 
-Users can **create**, **edit**, and **play** directly through typed commands.
+- **Three Game Modes**
+  - **Letters Mode**: Traditional letter-by-letter word guessing with visual feedback
+  - **Categories Mode**: Multi-attribute word comparison across custom categories
+  - **Hints Mode**: Progressive hint-based word guessing
 
----
+- **Dual Operation Modes**
+  - **Edit Mode**: Create, modify, and manage word bank files
+  - **Play Mode**: Interactive gameplay with customizable settings
 
-## 🚀 Modes Overview
+- **Flexible Storage**: Text-based word bank files with automatic format detection
 
-There are two main modes of operation:
+## Installation
 
-| Mode | Purpose |
-|------|----------|
-| **Edit Mode** | Create and manage word bank files |
-| **Play Mode** | Start and play the guessing game |
+### Prerequisites
+- Python 3.7+
+- Flask (for web interface)
 
-The current mode is always visible in the prompt:
+### Setup
+```bash
+# Clone the repository
+git clone <repository-url>
+cd lexis-interpreter
 
-[Edit] [fruits.txt] >>>
-[Play] [fruits.txt] >>>
+# Install dependencies
+pip install flask
 
----
+# Create word banks directory
+mkdir -p WordBanks
+```
 
-## 🧱 Edit Mode Commands
+## Usage
 
-Used to create, load, and modify word bank files.
-
-| Command | Description | Example |
-|----------|--------------|----------|
-| `create <filename>` | Create a new file. | `create fruits` |
-| `file <filename>` | Load an existing file into edit mode. | `file tea` |
-| `deletefile <filename>` | Delete a file from storage. | `deletefile tea` |
-| `categories <name1> \| <name2> \| ...` | Define column headers for category mode. | `categories size \| shape \| color` |
-| `add <word>` | Add a word (letters mode only). | `add apple` |
-| `add <word> \| <v1> \| <v2> \| ...` | Add a word and its associated values. | `add hibiscus \| large \| round \| red` |
-| `list` | Display all words and their details. | `list` |
-| `edit <index> \| <new_values>` | Modify a specific entry by index. | `edit 2 \| small \| star \| white` |
-| `delete <index>` | Delete a specific row by its index. | `delete 1` |
-| `done` | Exit edit mode and return to play mode. | `done` |
-| `help` | Show all available edit commands. | `help` |
-
----
-
-## 🎮 Play Mode Commands
-
-Used to play guessing games using a loaded word bank.
-
-| Command | Description | Example |
-|----------|--------------|----------|
-| `file <filename>` | Load a word bank into play mode. | `file fruits` |
-| `start` | Begin a new game session. Required before using `word` or `guess`. | `start` |
-| `word [word]` | Select or display the current secret word. | `word` |
-| `words` | List all available words from the file. | `words` |
-| `max_guesses <number>` | Set the maximum number of guesses. | `max_guesses 5` |
-| `guess <word>` | Submit a guess for the secret word. | `guess apple` |
-| `show` | Display the currently selected secret word. | `show` |
-| `edit` | Switch back to edit mode. | `edit` |
-| `help` | Display available play commands. | `help` |
-| `quit` | Exit the interpreter. | `quit` |
-
----
-
-## 💾 File Types
-
-Each file type determines how data is stored and used during play.
-
-| Mode | Structure | Example |
-|------|------------|----------|
-| **letters** | Each line contains one word | `apple` |
-| **categories** | First line defines column headers using pipes (`\|`) <br> Each subsequent line defines word entries | `word \| size \| shape \| color`<br>`hibiscus \| large \| round \| red` |
-| **hints** | Word followed by a hint separated by `\|` | `apple \| a red fruit` |
-
-> Using the `categories` command in Edit mode automatically switches the current file to **category mode**.
-
----
-
-## 🖥️ Running the Project
-
-### 🔹 Option 1: Run in Terminal (REPL)
+### Terminal REPL
 ```bash
 python repl.py
 ```
 
-### 🔹 Option 2: Run as a Web App
-
-Add codes in app.py and utilize flask file formatting
+### Web API
 ```bash
 flask run
+# or
+python app.py
 ```
----
 
-## 🧠 Example Workflow
+The API exposes a single endpoint:
+```
+POST /run
+Content-Type: application/json
+
+{
+  "command": "file fruits"
+}
+```
+
+## Command Reference
+
+### Edit Mode
+
+Edit mode commands allow you to create and manage word bank files.
+
+| Command | Description | Example |
+|---------|-------------|---------|
+| `create <filename>` | Create a new word bank file | `create animals` |
+| `file <filename>` | Load existing word bank | `file fruits.txt` |
+| `deletefile <filename>` | Delete a word bank file | `deletefile old_words` |
+| `categories <cat1> \| <cat2> \| ...` | Define category headers | `categories type \| color \| size` |
+| `add <word>` | Add word (letters mode) | `add apple` |
+| `add <word> \| <val1> \| <val2>` | Add word with attributes | `add rose \| flower \| red \| medium` |
+| `list` | Display all entries | `list` |
+| `edit <index> \| <values>` | Modify entry by index | `edit 1 \| tulip \| flower \| yellow` |
+| `delete <index>` | Remove entry by index | `delete 3` |
+| `done` | Return to play mode | `done` |
+| `help` | Show edit commands | `help` |
+
+### Play Mode
+
+Play mode commands control gameplay and game settings.
+
+| Command | Description | Example |
+|---------|-------------|---------|
+| `file <filename>` | Load word bank for gameplay | `file animals` |
+| `start` | Initialize new game session | `start` |
+| `word [<word>]` | Set or randomize secret word | `word` or `word elephant` |
+| `guess <word>` | Submit a guess | `guess tiger` |
+| `show` | Reveal current secret word | `show` |
+| `words` | List all available words | `words` |
+| `max_guesses <n>` | Set guess limit | `max_guesses 10` |
+| `edit` | Switch to edit mode | `edit` |
+| `help` | Show play commands | `help` |
+| `quit` | Exit interpreter | `quit` |
+
+## File Formats
+
+### Letters Mode
+Plain text, one word per line:
+```
+apple
+banana
+cherry
+```
+
+### Hints Mode
+Word followed by pipe-separated hints:
+```
+apple | red fruit | grows on trees
+banana | yellow fruit | monkeys love it
+```
+
+### Categories Mode
+Header row with pipe-separated categories, followed by word entries:
+```
+word | type | color | size
+rose | flower | red | medium
+oak | tree | brown | large
+tulip | flower | yellow | small
+```
+
+## Gameplay
+
+### Letters Mode Feedback
+- 🟩 Correct letter in correct position
+- 🟨 Correct letter in wrong position
+- ⬜ Letter not in word
+
+### Categories Mode Feedback
+- ✅ Category value matches
+- ❌ Category value differs
+
+### Hints Mode Feedback
+- Progressive hints revealed after each incorrect guess
+- Simple correct/incorrect messages
+
+## Example Session
+
 ```bash
-[Edit] >>> create tea
-Created 'tea' in letters mode.
+[Edit] >>> create flowers
+Created 'flowers' in letters mode (default).
 
-[Edit] [tea] >>> categories size | shape | color
-Saved to 'tea'
+[Edit] [flowers] >>> categories type | color | season
+Saved to 'flowers'
 
-[Edit] [tea] >>> add hibiscus | large | round | red
-Saved to 'tea'
+[Edit] [flowers] >>> add rose | perennial | red | summer
+Saved to 'flowers'
 
-[Edit] [tea] >>> add jasmine | small | star | white
-Saved to 'tea'
+[Edit] [flowers] >>> add tulip | bulb | yellow | spring
+Saved to 'flowers'
 
-[Edit] [tea] >>> list
-word | size | shape | color
-hibiscus | large | round | red
-jasmine | small | star | white
+[Edit] [flowers] >>> list
+word | type | color | season
+rose | perennial | red | summer
+tulip | bulb | yellow | spring
 
-[Edit] [tea] >>> done
+[Edit] [flowers] >>> done
 Exiting edit mode, back to play mode.
 
-[Play] [tea] >>> start
+[Play] [flowers] >>> start
 Game started in CATEGORIES mode. Use 'word' or 'word <word>' to select a secret word.
 
-[Play] [tea] >>> word
-Secret word set to 'hibiscus'. Use 'guess <word>' to start guessing.
+[Play] [flowers] >>> word
+Secret word has been set. Use 'guess <word>' to start guessing.
 
-[Play] [tea] >>> guess jasmine
-{"result": "continue", "feedback": ["size: ❌ (small)", "shape: ❌ (star)", "color: ❌ (white)"], "remaining": 5}
+[Play] [flowers] >>> guess tulip
+{"result": "continue", "feedback": ["type: ❌ (bulb)", "color: ❌ (yellow)", "season: ❌ (spring)"], "remaining": 5}
 
-[Play] [tea] >>> show
-The secret word is: hibiscus
+[Play] [flowers] >>> guess rose
+{"result": "win", "feedback": ["type: ✅ (perennial)", "color: ✅ (red)", "season: ✅ (summer)"]}
 ```
----
 
-## 📝 Notes
+## Project Structure
 
-- Always use `start` before selecting or guessing words in play mode.
-- `categories` must be defined before adding multi-column entries.
-- Quotation marks are optional unless your values include spaces.
-- The interpreter auto-detects file types when loading.
-- Commands are **case-insensitive**.
-
----
-
-## 🧩 Supported Modes Summary
-
-| Mode | Description | Feedback Type |
-|------|--------------|----------------|
-| **letters** | Word guessing (like Wordle) | Per-letter boxes (🟩 🟨 ⬜) |
-| **categories** | Compare category matches | Per-category ✅ / ❌ |
-| **hints** | Guess using hints | Text-based correctness messages |
-
----
-
-## 📂 Project Structure
-
-```bash
+```
+.
 ├── Interpreter/
 │   ├── __init__.py
-│   ├── interpreter.py # Main logic and command evaluation
-│   ├── parser.py # Command parsing into AST nodes
-│   ├── lexer.py # Tokenizer for user input
-│   ├── ast_nodes/
-│   │   ├── __init__.py
-│   │   ├── play.py # Play mode node definitions
-│   │   ├── edit.py # Edit mode node definitions
-│   │   └── base.py # Shared node base class
-├── WordBanks/ # Where all word bank files are stored
-├── repl.py # Runs Lexis in terminal
-├── app.py # Runs Lexis as a Web App
+│   ├── interpreter.py          # Core interpreter logic
+│   ├── lexer.py                # Tokenization
+│   ├── parser.py               # Command parsing
+│   └── ast_nodes/
+│       ├── __init__.py
+│       ├── base.py             # Base AST node
+│       ├── edit.py             # Edit mode nodes
+│       └── play.py             # Play mode nodes
+├── WordBanks/                  # Word bank storage
+├── app.py                      # Flask web API
+├── repl.py                     # Terminal interface
 └── README.md
 ```
+
+## Design Notes
+
+- Commands are case-insensitive
+- File format is auto-detected on load
+- Quotation marks optional unless values contain spaces
+- The `categories` command automatically switches files to category mode
+- Use `start` before selecting words or making guesses in play mode
+
+## Error Handling
+
+The interpreter provides clear error messages for common issues:
+- File not found
+- Empty word banks
+- Invalid indices
+- Mismatched category counts
+- Words not in current bank
+
+## License
+
+[Add your license information here]
+
+## Contributing
+
+[Add contribution guidelines here]
