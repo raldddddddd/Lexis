@@ -2,6 +2,11 @@
 
 A command-line word bank manager and word-guessing game framework built with Python. Lexis supports three game modes: letter-based word guessing (similar to Wordle), category-based comparison, and hint-driven gameplay.
 
+## Documentation
+This README is a short overview.  
+For the complete in-depth manual, download:  
+➡️ **[Lexis Full User Guide](docs/Lexis_Full_User_Guide.pdf)**
+
 ## Features
 
 - **Three Game Modes**
