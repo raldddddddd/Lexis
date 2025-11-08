@@ -192,9 +192,12 @@ Secret word has been set. Use 'guess <word>' to start guessing.
 │       ├── edit.py             # Edit mode nodes
 │       └── play.py             # Play mode nodes
 ├── WordBanks/                  # Word bank storage
+├── docs/
+│   └── Lexis_Full_User_Guide.pdf   # Full project documentation
 ├── app.py                      # Flask web API
 ├── repl.py                     # Terminal interface
 └── README.md
+
 ```
 
 ## Design Notes
